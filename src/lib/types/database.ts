@@ -186,7 +186,6 @@ export interface ContentEvent {
   target_id: string;
   metadata: Record<string, unknown> | null;
   created_at: string;
-  updated_at: string;
 }
 
 export interface Report {
@@ -212,7 +211,6 @@ export interface ContributionAgreement {
   terms_version: string;
   accepted_at: string;
   created_at: string;
-  updated_at: string;
 }
 
 // ============================================================================

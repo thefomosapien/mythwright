@@ -59,6 +59,34 @@ begin
 end;
 $$;
 
+-- Enforce that a comic's content_rating never exceeds its parent universe's rating.
+-- Rating order: E < T < M (indexes 1, 2, 3).
+create or replace function public.enforce_comic_rating_ceiling()
+returns trigger
+language plpgsql
+as $$
+declare
+  v_universe_rating text;
+  v_rating_order text[] := array['E', 'T', 'M'];
+  v_comic_idx int;
+  v_universe_idx int;
+begin
+  select content_rating into v_universe_rating
+  from public.universes
+  where id = new.universe_id;
+
+  v_comic_idx := array_position(v_rating_order, new.content_rating);
+  v_universe_idx := array_position(v_rating_order, v_universe_rating);
+
+  if v_comic_idx > v_universe_idx then
+    raise exception 'Comic content_rating (%) exceeds universe content_rating ceiling (%)',
+      new.content_rating, v_universe_rating;
+  end if;
+
+  return new;
+end;
+$$;
+
 -- ============================================================================
 -- TABLES
 -- ============================================================================
@@ -150,6 +178,10 @@ create trigger comics_updated_at
   before update on public.comics
   for each row execute function public.handle_updated_at();
 
+create trigger comics_enforce_rating_ceiling
+  before insert or update on public.comics
+  for each row execute function public.enforce_comic_rating_ceiling();
+
 -- ---------- comic_pages ----------
 create table public.comic_pages (
   id            uuid        not null primary key default gen_random_uuid(),
@@ -232,13 +264,8 @@ create table public.content_events (
     )),
   target_id   uuid        not null,
   metadata    jsonb       null,
-  created_at  timestamptz not null default now(),
-  updated_at  timestamptz not null default now()
+  created_at  timestamptz not null default now()
 );
-
-create trigger content_events_updated_at
-  before update on public.content_events
-  for each row execute function public.handle_updated_at();
 
 -- ---------- reports ----------
 create table public.reports (
@@ -276,13 +303,8 @@ create table public.contribution_agreements (
   license_type    text          not null,
   terms_version   text          not null,
   accepted_at     timestamptz   not null,
-  created_at      timestamptz   not null default now(),
-  updated_at      timestamptz   not null default now()
+  created_at      timestamptz   not null default now()
 );
-
-create trigger contribution_agreements_updated_at
-  before update on public.contribution_agreements
-  for each row execute function public.handle_updated_at();
 
 -- ============================================================================
 -- INDEXES
@@ -327,10 +349,10 @@ create policy "profiles_select_public"
   on public.profiles for select
   using (true);
 
--- Security-definer view to expose profiles without birth_date for public use.
--- Direct table access still has birth_date, but front-end should use this view.
+-- Security-invoker view to expose profiles without birth_date for public use.
+-- Uses security_invoker = true so auth.uid() resolves per-caller.
 create or replace view public.public_profiles
-  with (security_invoker = false)
+  with (security_invoker = true)
 as
   select
     id,
@@ -496,7 +518,7 @@ create policy "comic_pages_delete"
 -- LORE_ENTRIES
 -- ============================================================================
 
--- SELECT: published entries in published universes = public; drafts = creator only
+-- SELECT: published entries in published + age-appropriate universes = public; drafts = creator only
 create policy "lore_entries_select"
   on public.lore_entries for select
   using (
@@ -504,7 +526,9 @@ create policy "lore_entries_select"
       status = 'published'
       and exists (
         select 1 from public.universes u
-        where u.id = universe_id and u.status = 'published'
+        where u.id = universe_id
+          and u.status = 'published'
+          and u.content_rating = any(public.get_viewable_ratings(auth.uid()))
       )
     )
     or
@@ -569,6 +593,15 @@ create policy "events_select"
     or exists (
       select 1 from public.profiles p
       where p.id = auth.uid() and p.role = 'admin'
+    )
+    or target_id in (
+      select id from public.universes where creator_id = auth.uid()
+      union all
+      select id from public.comics where creator_id = auth.uid()
+      union all
+      select id from public.lore_entries where creator_id = auth.uid()
+      union all
+      select auth.uid() -- profile target: user owns their own profile
     )
   );
 
