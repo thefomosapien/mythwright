@@ -2,32 +2,51 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  const response = NextResponse.next({ request });
+
+  // Guard: if Supabase env vars are missing, pass through
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return response;
+  }
+
+  try {
+    return await handleRouteProtection(request, supabaseUrl, supabaseAnonKey);
+  } catch {
+    // If anything fails, pass the request through rather than crash
+    return response;
+  }
+}
+
+async function handleRouteProtection(
+  request: NextRequest,
+  supabaseUrl: string,
+  supabaseAnonKey: string
+) {
   let supabaseResponse = NextResponse.next({ request });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
+  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
       },
-    }
-  );
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) =>
+          request.cookies.set(name, value)
+        );
+        supabaseResponse = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          supabaseResponse.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
 
   const pathname = request.nextUrl.pathname;
 
-  // Only check auth for routes that need protection
+  // Only check auth + profile for routes that need protection
   const protectedPrefixes = ["/login", "/signup", "/onboarding", "/create"];
   const needsAuthCheck = protectedPrefixes.some(
     (prefix) => pathname === prefix || pathname.startsWith(prefix + "/")
@@ -35,37 +54,24 @@ export async function middleware(request: NextRequest) {
 
   if (!needsAuthCheck) {
     // Public route — just refresh the session without blocking
-    try {
-      await supabase.auth.getUser();
-    } catch {
-      // Ignore auth errors on public routes
-    }
+    await supabase.auth.getUser();
     return supabaseResponse;
   }
 
   // Protected route — check auth and onboarding status
-  let user = null;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   let isOnboarded = false;
-
-  try {
-    const { data } = await supabase.auth.getUser();
-    user = data.user;
-  } catch {
-    // Auth check failed — treat as unauthenticated
-  }
-
   if (user) {
-    try {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("is_onboarded")
-        .eq("id", user.id)
-        .single();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_onboarded")
+      .eq("id", user.id)
+      .single();
 
-      isOnboarded = profile?.is_onboarded ?? false;
-    } catch {
-      // Profile fetch failed — treat as not onboarded
-    }
+    isOnboarded = profile?.is_onboarded ?? false;
   }
 
   // /login and /signup — if authenticated and onboarded, redirect to /
