@@ -25,22 +25,47 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   const pathname = request.nextUrl.pathname;
 
-  // Check onboarding status for authenticated users
-  let isOnboarded = false;
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("is_onboarded")
-      .eq("id", user.id)
-      .single();
+  // Only check auth for routes that need protection
+  const protectedPrefixes = ["/login", "/signup", "/onboarding", "/create"];
+  const needsAuthCheck = protectedPrefixes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(prefix + "/")
+  );
 
-    isOnboarded = profile?.is_onboarded ?? false;
+  if (!needsAuthCheck) {
+    // Public route — just refresh the session without blocking
+    try {
+      await supabase.auth.getUser();
+    } catch {
+      // Ignore auth errors on public routes
+    }
+    return supabaseResponse;
+  }
+
+  // Protected route — check auth and onboarding status
+  let user = null;
+  let isOnboarded = false;
+
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    // Auth check failed — treat as unauthenticated
+  }
+
+  if (user) {
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_onboarded")
+        .eq("id", user.id)
+        .single();
+
+      isOnboarded = profile?.is_onboarded ?? false;
+    } catch {
+      // Profile fetch failed — treat as not onboarded
+    }
   }
 
   // /login and /signup — if authenticated and onboarded, redirect to /
@@ -83,7 +108,6 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // All other routes — public
   return supabaseResponse;
 }
 
