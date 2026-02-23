@@ -55,7 +55,7 @@ export default async function CreatorDashboard() {
       <div className="mb-10 flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Your Worlds</h1>
         <a
-          href="/create/comic/new"
+          href="/create/universe/new"
           className="inline-flex items-center justify-center rounded-md bg-gold px-6 py-3 text-base font-medium text-background transition-colors hover:bg-gold-light"
         >
           New Universe
@@ -65,40 +65,42 @@ export default async function CreatorDashboard() {
       {universes && universes.length > 0 ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {universes.map((universe) => (
-            <Card key={universe.id} glow>
-              {universe.cover_image_url && (
-                <div className="aspect-[16/9] overflow-hidden rounded-t-lg">
-                  <img
-                    src={universe.cover_image_url}
-                    alt={universe.title}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              )}
-              <div className="p-4">
-                <div className="mb-2 flex items-center gap-2">
-                  <h2 className="text-lg font-semibold text-foreground">
-                    {universe.title}
-                  </h2>
-                  <RatingBadge rating={universe.content_rating as ContentRating} />
-                  <Tag label={universe.status} variant="status" />
-                </div>
-                {universe.tagline && (
-                  <p className="mb-3 text-sm text-foreground-muted line-clamp-2">
-                    {universe.tagline}
-                  </p>
+            <a key={universe.id} href={`/create/universe/${universe.slug}/edit`}>
+              <Card glow>
+                {universe.cover_image_url && (
+                  <div className="aspect-[16/9] overflow-hidden rounded-t-lg">
+                    <img
+                      src={universe.cover_image_url}
+                      alt={universe.title}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
                 )}
-                <div className="flex flex-wrap items-center gap-2">
-                  {universe.genre?.slice(0, 3).map((g: string) => (
-                    <Tag key={g} label={g} variant="genre" />
-                  ))}
+                <div className="p-4">
+                  <div className="mb-2 flex items-center gap-2">
+                    <h2 className="text-lg font-semibold text-foreground">
+                      {universe.title}
+                    </h2>
+                    <RatingBadge rating={universe.content_rating as ContentRating} />
+                    <Tag label={universe.status} variant="status" />
+                  </div>
+                  {universe.tagline && (
+                    <p className="mb-3 text-sm text-foreground-muted line-clamp-2">
+                      {universe.tagline}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {universe.genre?.slice(0, 3).map((g: string) => (
+                      <Tag key={g} label={g} variant="genre" />
+                    ))}
+                  </div>
+                  <div className="mt-3 flex gap-4 text-xs text-foreground-subtle">
+                    <span>{universe.comic_count} comics</span>
+                    <span>{universe.follower_count} followers</span>
+                  </div>
                 </div>
-                <div className="mt-3 flex gap-4 text-xs text-foreground-subtle">
-                  <span>{universe.comic_count} comics</span>
-                  <span>{universe.follower_count} followers</span>
-                </div>
-              </div>
-            </Card>
+              </Card>
+            </a>
           ))}
         </div>
       ) : (
