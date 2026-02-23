@@ -27,39 +27,41 @@ export default async function HomePage() {
       {universes && universes.length > 0 ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {universes.map((universe) => (
-            <Card key={universe.id} glow>
-              {universe.cover_image_url && (
-                <div className="aspect-[16/9] overflow-hidden rounded-t-lg">
-                  <img
-                    src={universe.cover_image_url}
-                    alt={universe.title}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              )}
-              <div className="p-4">
-                <div className="mb-2 flex items-center gap-2">
-                  <h2 className="text-lg font-semibold text-foreground">
-                    {universe.title}
-                  </h2>
-                  <RatingBadge rating={universe.content_rating as ContentRating} />
-                </div>
-                {universe.tagline && (
-                  <p className="mb-3 text-sm text-foreground-muted line-clamp-2">
-                    {universe.tagline}
-                  </p>
+            <a key={universe.id} href={`/universe/${universe.slug}`}>
+              <Card glow>
+                {universe.cover_image_url && (
+                  <div className="aspect-[16/9] overflow-hidden rounded-t-lg">
+                    <img
+                      src={universe.cover_image_url}
+                      alt={universe.title}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
                 )}
-                <div className="flex flex-wrap items-center gap-2">
-                  {universe.genre?.slice(0, 3).map((g: string) => (
-                    <Tag key={g} label={g} variant="genre" />
-                  ))}
+                <div className="p-4">
+                  <div className="mb-2 flex items-center gap-2">
+                    <h2 className="text-lg font-semibold text-foreground">
+                      {universe.title}
+                    </h2>
+                    <RatingBadge rating={universe.content_rating as ContentRating} />
+                  </div>
+                  {universe.tagline && (
+                    <p className="mb-3 text-sm text-foreground-muted line-clamp-2">
+                      {universe.tagline}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {universe.genre?.slice(0, 3).map((g: string) => (
+                      <Tag key={g} label={g} variant="genre" />
+                    ))}
+                  </div>
+                  <p className="mt-3 text-xs text-foreground-subtle">
+                    {universe.follower_count}{" "}
+                    {universe.follower_count === 1 ? "follower" : "followers"}
+                  </p>
                 </div>
-                <p className="mt-3 text-xs text-foreground-subtle">
-                  {universe.follower_count}{" "}
-                  {universe.follower_count === 1 ? "follower" : "followers"}
-                </p>
-              </div>
-            </Card>
+              </Card>
+            </a>
           ))}
         </div>
       ) : (
