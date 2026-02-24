@@ -4,7 +4,8 @@ import Card from "@/components/ui/Card";
 import RatingBadge from "@/components/ui/RatingBadge";
 import Tag from "@/components/ui/Tag";
 import FollowButton from "@/components/universe/FollowButton";
-import type { ContentRating, CanonStatus } from "@/lib/types/database";
+import LoreEntryCard from "@/components/lore/LoreEntryCard";
+import type { ContentRating } from "@/lib/types/database";
 
 export default async function UniverseDetailPage({
   params,
@@ -57,14 +58,15 @@ export default async function UniverseDetailPage({
 
   const { data: comics } = await comicsQuery;
 
-  // Fetch lore entries
+  // Fetch lore entries (up to 6 for preview)
   const loreQuery = supabase
     .from("lore_entries")
     .select(
-      "id, entry_type, title, slug, image_url, is_mist_zone, canon_tier, status"
+      "id, entry_type, title, slug, image_url, content, is_mist_zone, canon_tier, status"
     )
     .eq("universe_id", universe.id)
-    .order("sort_order", { ascending: true });
+    .order("sort_order", { ascending: true })
+    .limit(6);
 
   if (!isCreator) {
     loreQuery.eq("status", "published");
@@ -84,51 +86,40 @@ export default async function UniverseDetailPage({
     isFollowing = !!follow;
   }
 
-  // Group lore entries by type
-  const loreByType: Record<string, typeof loreEntries> = {};
-  loreEntries?.forEach((entry) => {
-    if (!loreByType[entry.entry_type]) {
-      loreByType[entry.entry_type] = [];
-    }
-    loreByType[entry.entry_type]!.push(entry);
-  });
-
-  const loreTypeLabels: Record<string, string> = {
-    character: "Characters",
-    faction: "Factions",
-    location: "Locations",
-    event: "Events",
-    item: "Items",
-    lore: "Lore",
-    custom: "Other",
-  };
-
   return (
     <div>
       {/* Banner */}
-      {universe.banner_image_url && (
-        <div className="relative h-48 w-full overflow-hidden sm:h-64 lg:h-80">
+      <div className="relative h-48 w-full overflow-hidden sm:h-64 lg:h-80">
+        {universe.banner_image_url ? (
           <img
             src={universe.banner_image_url}
             alt=""
             className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
-        </div>
-      )}
+        ) : (
+          <div className="h-full w-full bg-gradient-to-br from-void-800 via-void-900 to-void-950" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+      </div>
 
       <div className="mx-auto max-w-7xl px-4 py-8">
-        {/* Header */}
-        <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-start">
-          {universe.cover_image_url && (
-            <div className="w-48 shrink-0 overflow-hidden rounded-lg border border-border shadow-lg">
+        {/* Hero Header */}
+        <div className="relative -mt-24 mb-10 flex flex-col gap-6 sm:flex-row sm:items-end">
+          {/* Cover image overlapping banner */}
+          <div className="w-48 shrink-0 overflow-hidden rounded-lg border border-border shadow-lg">
+            {universe.cover_image_url ? (
               <img
                 src={universe.cover_image_url}
                 alt={universe.title}
                 className="aspect-[16/9] w-full object-cover"
               />
-            </div>
-          )}
+            ) : (
+              <div className="flex aspect-[16/9] w-full items-center justify-center bg-void-800 text-3xl font-bold text-void-400">
+                {universe.title.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
+
           <div className="flex-1">
             <div className="mb-2 flex flex-wrap items-center gap-3">
               <h1 className="font-display text-3xl font-bold text-void-50 sm:text-4xl">
@@ -142,16 +133,11 @@ export default async function UniverseDetailPage({
               )}
             </div>
             {universe.tagline && (
-              <p className="mb-3 font-prose text-lg text-void-200">
+              <p className="mb-3 font-prose text-lg italic text-void-200">
                 {universe.tagline}
               </p>
             )}
-            {universe.description && (
-              <p className="mb-4 max-w-2xl font-prose text-void-200">
-                {universe.description}
-              </p>
-            )}
-            <div className="mb-4 flex flex-wrap gap-2">
+            <div className="mb-3 flex flex-wrap gap-2">
               {universe.genre?.map((g: string) => (
                 <Tag key={g} label={g} variant="genre" />
               ))}
@@ -176,10 +162,6 @@ export default async function UniverseDetailPage({
                   {creator.display_name}
                 </a>
               )}
-              <span>
-                {universe.comic_count}{" "}
-                {universe.comic_count === 1 ? "comic" : "comics"}
-              </span>
               <span>
                 {universe.follower_count}{" "}
                 {universe.follower_count === 1 ? "follower" : "followers"}
@@ -207,7 +189,9 @@ export default async function UniverseDetailPage({
         {/* Comics Section */}
         <section className="mb-12">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="font-display text-xl font-semibold text-void-50">Comics</h2>
+            <h2 className="font-display text-xl font-semibold text-void-50">
+              Comics
+            </h2>
             {isCreator && (
               <a
                 href={`/create/universe/${universe.slug}/edit`}
@@ -225,15 +209,19 @@ export default async function UniverseDetailPage({
                   href={`/universe/${slug}/comic/${comic.slug}`}
                 >
                   <Card glow>
-                    {comic.cover_image_url && (
-                      <div className="aspect-[3/4] overflow-hidden rounded-t-lg">
+                    <div className="aspect-[3/4] overflow-hidden rounded-t-lg bg-void-900">
+                      {comic.cover_image_url ? (
                         <img
                           src={comic.cover_image_url}
                           alt={comic.title}
                           className="h-full w-full object-cover"
                         />
-                      </div>
-                    )}
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-void-400">
+                          {comic.title.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
                     <div className="p-4">
                       <div className="mb-1 flex items-center gap-2">
                         <h3 className="font-semibold text-foreground">
@@ -277,67 +265,56 @@ export default async function UniverseDetailPage({
           )}
         </section>
 
-        {/* Lore Section */}
-        {loreEntries && loreEntries.length > 0 && (
-          <section>
-            <h2 className="mb-6 font-display text-xl font-semibold text-void-50">
-              Lorebook
+        {/* Lore Bible Preview */}
+        <section className="mb-12">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="font-display text-xl font-semibold text-void-50">
+              Lore Bible
             </h2>
-            <div className="space-y-8">
-              {Object.entries(loreByType).map(([type, entries]) => (
-                <div key={type}>
-                  <h3 className="mb-4 text-lg font-medium capitalize text-foreground-muted">
-                    {loreTypeLabels[type] || type}
-                  </h3>
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {entries!.map((entry) => (
-                      <div
-                        key={entry.id}
-                        className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3 transition-colors hover:border-border-hover"
-                      >
-                        {entry.image_url ? (
-                          <img
-                            src={entry.image_url}
-                            alt=""
-                            className="h-12 w-12 shrink-0 rounded-lg object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gold/10 text-lg font-bold text-gold">
-                            {entry.title.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="truncate font-medium text-foreground">
-                              {entry.title}
-                            </h4>
-                            {entry.is_mist_zone && (
-                              <span
-                                className="shrink-0 text-xs text-foreground-subtle"
-                                title="Mist Zone — lore is partially hidden"
-                              >
-                                [Mist]
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Tag
-                              label={entry.canon_tier}
-                              variant="canon"
-                            />
-                            {isCreator && (
-                              <Tag
-                                label={entry.status}
-                                variant="status"
-                              />
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            {loreEntries && loreEntries.length > 0 && (
+              <a
+                href={`/u/${slug}/lore`}
+                className="text-sm text-gold transition-colors hover:text-gold-light"
+              >
+                Explore All &rarr;
+              </a>
+            )}
+          </div>
+          {loreEntries && loreEntries.length > 0 ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {loreEntries.map((entry) => (
+                <LoreEntryCard
+                  key={entry.id}
+                  entry={entry}
+                  universeSlug={slug}
+                  showType
+                  isCreator={isCreator}
+                />
               ))}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-border bg-surface px-8 py-12 text-center">
+              <p className="font-prose text-foreground-muted">
+                This universe&rsquo;s lore is still being written.
+              </p>
+            </div>
+          )}
+        </section>
+
+        {/* Description */}
+        {universe.description && (
+          <section>
+            <h2 className="mb-4 font-display text-xl font-semibold text-void-50">
+              About
+            </h2>
+            <div className="max-w-3xl font-prose text-void-200">
+              {universe.description.split("\n").map((paragraph: string, i: number) =>
+                paragraph.trim() ? (
+                  <p key={i} className="mb-3">
+                    {paragraph}
+                  </p>
+                ) : null
+              )}
             </div>
           </section>
         )}
