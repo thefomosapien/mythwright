@@ -205,7 +205,7 @@ export default function EditUniversePage() {
     <div className="mx-auto max-w-4xl px-4 py-12">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Edit Universe</h1>
+          <h1 className="font-display text-3xl font-bold text-void-50">Edit Universe</h1>
           <p className="mt-1 text-foreground-subtle">
             <a
               href={`/universe/${slug}`}
@@ -422,15 +422,24 @@ export default function EditUniversePage() {
         {/* Sidebar — Comics */}
         <div>
           <div className="rounded-lg border border-border bg-surface p-4">
-            <h2 className="mb-4 text-lg font-semibold text-foreground">
-              Comics
-            </h2>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-foreground">
+                Comics
+              </h2>
+              <a
+                href={`/create/comic/new?universe=${slug}`}
+                className="inline-flex items-center justify-center rounded-md bg-forge-500 px-3 py-1.5 text-xs font-medium text-void-950 transition-colors hover:bg-forge-300"
+              >
+                Add Comic
+              </a>
+            </div>
             {comics.length > 0 ? (
               <div className="space-y-3">
                 {comics.map((comic) => (
-                  <div
+                  <a
                     key={comic.id}
-                    className="flex items-center justify-between rounded-md border border-border p-3"
+                    href={`/create/comic/${comic.id}/pages`}
+                    className="flex items-center justify-between rounded-md border border-border p-3 transition-colors hover:border-border-hover hover:bg-surface-hover"
                   >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
@@ -454,16 +463,47 @@ export default function EditUniversePage() {
                         </span>
                       </p>
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             ) : (
               <p className="text-sm text-foreground-subtle">
-                No comics yet. Comics can be added to your universe once it is
-                created.
+                No comics yet.{" "}
+                <a
+                  href={`/create/comic/new?universe=${slug}`}
+                  className="text-gold hover:text-gold-light"
+                >
+                  Add your first comic
+                </a>
               </p>
             )}
           </div>
+
+          {/* Completeness nudges — only for published universes */}
+          {status === "published" && (
+            <div className="mt-4 space-y-2">
+              {!coverImageUrl && (
+                <div className="rounded-lg border border-amber/30 bg-amber/5 px-4 py-2.5 text-sm text-amber">
+                  Add a cover image to stand out in discovery
+                </div>
+              )}
+              {!tagline.trim() && (
+                <div className="rounded-lg border border-amber/30 bg-amber/5 px-4 py-2.5 text-sm text-amber">
+                  Write a short tagline to hook readers
+                </div>
+              )}
+              {!description.trim() && (
+                <div className="rounded-lg border border-amber/30 bg-amber/5 px-4 py-2.5 text-sm text-amber">
+                  Describe your world for curious explorers
+                </div>
+              )}
+              {genres.length === 0 && (
+                <div className="rounded-lg border border-amber/30 bg-amber/5 px-4 py-2.5 text-sm text-amber">
+                  Add genre tags so readers can find your universe
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Status info */}
           <div className="mt-4 rounded-lg border border-border bg-surface p-4">
