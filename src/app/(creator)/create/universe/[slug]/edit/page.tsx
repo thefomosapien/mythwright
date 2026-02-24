@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import Input from "@/components/ui/Input";
 import TextArea from "@/components/ui/TextArea";
@@ -174,7 +176,7 @@ export default function EditUniversePage() {
   }, [supabase, slug, router]);
 
   useEffect(() => {
-    loadUniverse();
+    loadUniverse(); // eslint-disable-line react-hooks/set-state-in-effect -- fetch on mount
   }, [loadUniverse]);
 
   function toggleGenre(genre: string) {
@@ -274,12 +276,12 @@ export default function EditUniversePage() {
         <div>
           <h1 className="font-display text-3xl font-bold text-void-50">Edit Universe</h1>
           <p className="mt-1 text-foreground-subtle">
-            <a
+            <Link
               href={`/universe/${slug}`}
               className="text-gold transition-colors hover:text-gold-light"
             >
               View public page
-            </a>
+            </Link>
           </p>
         </div>
         <div className="flex gap-3">
@@ -526,20 +528,20 @@ export default function EditUniversePage() {
                 <h2 className="text-lg font-semibold text-foreground">
                   Comics
                 </h2>
-                <a
+                <Link
                   href={`/create/comic/new?universe=${slug}`}
-                  className="inline-flex items-center justify-center rounded-md bg-forge-500 px-3 py-1.5 text-xs font-medium text-void-950 transition-colors hover:bg-forge-300"
+                  className="inline-flex items-center justify-center rounded-md bg-forge-500 px-3 py-1.5 text-xs font-medium text-void-950 transition-colors hover:bg-forge-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500"
                 >
                   Add Comic
-                </a>
+                </Link>
               </div>
               {comics.length > 0 ? (
                 <div className="space-y-3">
                   {comics.map((comic) => (
-                    <a
+                    <Link
                       key={comic.id}
                       href={`/create/comic/${comic.id}/pages`}
-                      className="flex items-center justify-between rounded-md border border-border p-3 transition-colors hover:border-border-hover hover:bg-surface-hover"
+                      className="flex items-center justify-between rounded-md border border-border p-3 transition-colors hover:border-border-hover hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500"
                     >
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
@@ -563,18 +565,18 @@ export default function EditUniversePage() {
                           </span>
                         </p>
                       </div>
-                    </a>
+                    </Link>
                   ))}
                 </div>
               ) : (
                 <p className="text-sm text-foreground-subtle">
                   No comics yet.{" "}
-                  <a
+                  <Link
                     href={`/create/comic/new?universe=${slug}`}
                     className="text-gold hover:text-gold-light"
                   >
                     Add your first comic
-                  </a>
+                  </Link>
                 </p>
               )}
             </div>
@@ -630,12 +632,12 @@ export default function EditUniversePage() {
             <h2 className="text-lg font-semibold text-foreground">
               Lore Entries
             </h2>
-            <a
+            <Link
               href={`/create/universe/${slug}/lore/new`}
-              className="inline-flex items-center justify-center rounded-md bg-forge-500 px-4 py-2 text-sm font-medium text-void-950 transition-colors hover:bg-forge-300"
+              className="inline-flex items-center justify-center rounded-md bg-forge-500 px-4 py-2 text-sm font-medium text-void-950 transition-colors hover:bg-forge-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500"
             >
               New Lore Entry
-            </a>
+            </Link>
           </div>
 
           <LoreTypeNav
@@ -653,19 +655,21 @@ export default function EditUniversePage() {
                   TYPE_LABELS[entry.entry_type] || entry.entry_type;
 
                 return (
-                  <a
+                  <Link
                     key={entry.id}
                     href={`/create/universe/${slug}/lore/${entry.slug}/edit`}
-                    className={`flex items-center gap-3 rounded-lg border bg-surface p-3 transition-colors hover:border-border-hover hover:bg-surface-hover ${
+                    className={`flex items-center gap-3 rounded-lg border bg-surface p-3 transition-colors hover:border-border-hover hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500 ${
                       entry.is_mist_zone
                         ? "border-mist-500/40"
                         : "border-border"
                     }`}
                   >
                     {entry.image_url ? (
-                      <img
+                      <Image
                         src={entry.image_url}
                         alt=""
+                        width={48}
+                        height={48}
                         className="h-12 w-12 shrink-0 rounded-lg object-cover"
                       />
                     ) : (
@@ -692,7 +696,7 @@ export default function EditUniversePage() {
                         <Tag label={entry.canon_tier} variant="canon" />
                       </div>
                     </div>
-                  </a>
+                  </Link>
                 );
               })}
             </div>
@@ -703,12 +707,12 @@ export default function EditUniversePage() {
                   ? `No ${TYPE_LABELS[loreFilter]?.toLowerCase() || "entries"} yet.`
                   : "No lore entries yet."}
               </p>
-              <a
+              <Link
                 href={`/create/universe/${slug}/lore/new`}
                 className="mt-2 inline-block text-sm text-gold transition-colors hover:text-gold-light"
               >
                 Create your first lore entry
-              </a>
+              </Link>
             </div>
           )}
         </div>

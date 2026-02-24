@@ -17,7 +17,7 @@ export default function Card({
     <div
       onClick={onClick}
       className={`rounded-lg border border-border bg-void-800 ${
-        interactive ? "cursor-pointer" : ""
+        interactive ? "cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500" : ""
       } ${
         glow
           ? "transition-shadow hover:shadow-glow-md"

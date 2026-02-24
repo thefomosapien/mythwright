@@ -1,3 +1,5 @@
+import Link from "next/link";
+import Image from "next/image";
 import Card from "@/components/ui/Card";
 import Tag from "@/components/ui/Tag";
 import {
@@ -64,7 +66,7 @@ export default function LoreEntryCard({
     : `/u/${universeSlug}/lore/${entry.entry_type}/${entry.slug}`;
 
   return (
-    <a href={href}>
+    <Link href={href}>
       <Card
         glow
         className={
@@ -76,10 +78,13 @@ export default function LoreEntryCard({
         {/* Image or placeholder */}
         <div className="relative aspect-[16/9] overflow-hidden rounded-t-lg bg-void-900">
           {entry.image_url ? (
-            <img
+            <Image
               src={entry.image_url}
               alt={entry.title}
+              width={640}
+              height={360}
               className="h-full w-full object-cover"
+              loading="lazy"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center">
@@ -116,6 +121,6 @@ export default function LoreEntryCard({
           )}
         </div>
       </Card>
-    </a>
+    </Link>
   );
 }

@@ -1,76 +1,79 @@
 import { createClient } from "@/lib/supabase/server";
-import Card from "@/components/ui/Card";
-import RatingBadge from "@/components/ui/RatingBadge";
-import Tag from "@/components/ui/Tag";
-import type { ContentRating } from "@/lib/types/database";
+import UniverseDiscovery from "@/components/universe/UniverseDiscovery";
+import type { UniverseCardData } from "@/components/universe/UniverseCard";
 
 export default async function HomePage() {
   const supabase = await createClient();
 
-  const { data: universes } = await supabase
+  // Fetch initial universes (newest first, page 1)
+  const { data: rawUniverses } = await supabase
     .from("universes")
-    .select("id, slug, title, tagline, content_rating, genre, cover_image_url, follower_count")
+    .select(
+      "id, slug, title, tagline, content_rating, genre, cover_image_url, follower_count, created_at, creator_id, profiles!universes_creator_id_fkey(username, display_name, avatar_url)"
+    )
     .eq("status", "published")
-    .order("follower_count", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(0, 19);
+
+  // Fetch distinct genres from published universes
+  const { data: allPublished } = await supabase
+    .from("universes")
+    .select("genre")
+    .eq("status", "published");
+
+  const genreSet = new Set<string>();
+  allPublished?.forEach((u) => {
+    u.genre?.forEach((g: string) => genreSet.add(g));
+  });
+  const genres = Array.from(genreSet).sort();
+
+  const universes: UniverseCardData[] = (rawUniverses || []).map((u) => {
+    const profile = u.profiles as unknown as {
+      username: string;
+      display_name: string;
+      avatar_url: string | null;
+    } | null;
+    return {
+      id: u.id,
+      slug: u.slug,
+      title: u.title,
+      tagline: u.tagline,
+      content_rating: u.content_rating as UniverseCardData["content_rating"],
+      genre: u.genre || [],
+      cover_image_url: u.cover_image_url,
+      follower_count: u.follower_count,
+      creator: profile
+        ? {
+            username: profile.username,
+            display_name: profile.display_name,
+            avatar_url: profile.avatar_url,
+          }
+        : null,
+    };
+  });
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
-      <div className="mb-10">
-        <h1 className="font-display text-3xl font-bold text-void-50 sm:text-4xl">
+      {/* Hero section */}
+      <div className="relative mb-10 text-center">
+        {/* Warm radial glow */}
+        <div
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-64 w-96 rounded-full"
+          style={{
+            background:
+              "radial-gradient(ellipse at center, rgba(212, 168, 67, 0.05) 0%, transparent 70%)",
+          }}
+          aria-hidden="true"
+        />
+        <h1 className="relative font-display text-4xl font-bold text-void-50 sm:text-5xl">
           Discover Worlds
         </h1>
-        <p className="mt-2 font-prose text-lg text-void-200">
+        <p className="relative mt-3 font-prose text-lg text-void-200">
           Explore comic universes built by creators and expanded by communities.
         </p>
       </div>
 
-      {universes && universes.length > 0 ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {universes.map((universe) => (
-            <a key={universe.id} href={`/universe/${universe.slug}`}>
-              <Card glow>
-                {universe.cover_image_url && (
-                  <div className="aspect-[16/9] overflow-hidden rounded-t-lg">
-                    <img
-                      src={universe.cover_image_url}
-                      alt={universe.title}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                )}
-                <div className="p-4">
-                  <div className="mb-2 flex items-center gap-2">
-                    <h2 className="text-lg font-semibold text-foreground">
-                      {universe.title}
-                    </h2>
-                    <RatingBadge rating={universe.content_rating as ContentRating} />
-                  </div>
-                  {universe.tagline && (
-                    <p className="mb-3 text-sm text-foreground-muted line-clamp-2">
-                      {universe.tagline}
-                    </p>
-                  )}
-                  <div className="flex flex-wrap items-center gap-2">
-                    {universe.genre?.slice(0, 3).map((g: string) => (
-                      <Tag key={g} label={g} variant="genre" />
-                    ))}
-                  </div>
-                  <p className="mt-3 text-xs text-foreground-subtle">
-                    {universe.follower_count}{" "}
-                    {universe.follower_count === 1 ? "follower" : "followers"}
-                  </p>
-                </div>
-              </Card>
-            </a>
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-lg border border-border bg-surface px-8 py-16 text-center">
-          <p className="text-foreground-muted">
-            No universes yet. Be the first to create one.
-          </p>
-        </div>
-      )}
+      <UniverseDiscovery initialUniverses={universes} genres={genres} />
     </div>
   );
 }

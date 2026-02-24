@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import LoreEntryCard from "@/components/lore/LoreEntryCard";
 import LoreTypeNav from "@/components/lore/LoreTypeNav";
@@ -93,12 +94,12 @@ export default async function LoreBiblePage({
       <div className="mb-8 flex items-center justify-between">
         <div>
           <nav className="mb-2 flex items-center gap-1.5 text-sm text-foreground-subtle">
-            <a
+            <Link
               href={`/universe/${universe.slug}`}
               className="transition-colors hover:text-gold"
             >
               {universe.title}
-            </a>
+            </Link>
             <span>/</span>
             <span className="text-foreground">Lore Bible</span>
           </nav>
@@ -107,12 +108,12 @@ export default async function LoreBiblePage({
           </h1>
         </div>
         {isCreator && (
-          <a
+          <Link
             href={`/create/universe/${universe.slug}/lore/new`}
-            className="inline-flex items-center justify-center rounded-md bg-forge-500 px-4 py-2 text-sm font-medium text-void-950 transition-colors hover:bg-forge-300"
+            className="inline-flex items-center justify-center rounded-md bg-forge-500 px-4 py-2 text-sm font-medium text-void-950 transition-colors hover:bg-forge-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500"
           >
             New Entry
-          </a>
+          </Link>
         )}
       </div>
 

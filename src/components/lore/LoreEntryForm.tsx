@@ -386,7 +386,7 @@ export default function LoreEntryForm({
   }, [supabase, universeId]);
 
   useEffect(() => {
-    loadOptions();
+    loadOptions(); // eslint-disable-line react-hooks/set-state-in-effect -- fetch on mount
   }, [loadOptions]);
 
   function buildMetadata(): Record<string, unknown> | null {

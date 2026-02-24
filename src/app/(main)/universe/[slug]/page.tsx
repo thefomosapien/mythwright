@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import Card from "@/components/ui/Card";
 import RatingBadge from "@/components/ui/RatingBadge";
 import Tag from "@/components/ui/Tag";
 import FollowButton from "@/components/universe/FollowButton";
+import ReportButton from "@/components/ui/ReportButton";
 import LoreEntryCard from "@/components/lore/LoreEntryCard";
 import type { ContentRating } from "@/lib/types/database";
 
@@ -25,13 +28,11 @@ export default async function UniverseDetailPage({
     notFound();
   }
 
-  // Check if current user is the creator
   const {
     data: { user },
   } = await supabase.auth.getUser();
   const isCreator = user?.id === universe.creator_id;
 
-  // Only show draft/archived to the creator
   if (universe.status !== "published" && !isCreator) {
     notFound();
   }
@@ -91,10 +92,12 @@ export default async function UniverseDetailPage({
       {/* Banner */}
       <div className="relative h-48 w-full overflow-hidden sm:h-64 lg:h-80">
         {universe.banner_image_url ? (
-          <img
+          <Image
             src={universe.banner_image_url}
             alt=""
-            className="h-full w-full object-cover"
+            fill
+            className="object-cover"
+            priority
           />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-void-800 via-void-900 to-void-950" />
@@ -105,16 +108,17 @@ export default async function UniverseDetailPage({
       <div className="mx-auto max-w-7xl px-4 py-8">
         {/* Hero Header */}
         <div className="relative -mt-24 mb-10 flex flex-col gap-6 sm:flex-row sm:items-end">
-          {/* Cover image overlapping banner */}
-          <div className="w-48 shrink-0 overflow-hidden rounded-lg border border-border shadow-lg">
+          <div className="w-48 shrink-0 overflow-hidden rounded-lg border border-void-700 shadow-lg">
             {universe.cover_image_url ? (
-              <img
+              <Image
                 src={universe.cover_image_url}
-                alt={universe.title}
+                alt={`Cover image for ${universe.title}`}
+                width={192}
+                height={108}
                 className="aspect-[16/9] w-full object-cover"
               />
             ) : (
-              <div className="flex aspect-[16/9] w-full items-center justify-center bg-void-800 text-3xl font-bold text-void-400">
+              <div className="flex aspect-[16/9] w-full items-center justify-center bg-gradient-to-br from-void-800 to-forge-700/20 text-3xl font-bold text-void-400">
                 {universe.title.charAt(0).toUpperCase()}
               </div>
             )}
@@ -142,45 +146,59 @@ export default async function UniverseDetailPage({
                 <Tag key={g} label={g} variant="genre" />
               ))}
             </div>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-foreground-subtle">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-void-300">
               {creator && (
-                <a
+                <Link
                   href={`/profile/${creator.username}`}
-                  className="flex items-center gap-2 transition-colors hover:text-gold"
+                  className="flex items-center gap-2 transition-colors hover:text-forge-400"
                 >
                   {creator.avatar_url ? (
-                    <img
+                    <Image
                       src={creator.avatar_url}
                       alt=""
+                      width={20}
+                      height={20}
                       className="h-5 w-5 rounded-full object-cover"
                     />
                   ) : (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold/20 text-xs font-bold text-gold">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-forge-500/20 text-xs font-bold text-forge-400">
                       {creator.display_name.charAt(0).toUpperCase()}
                     </span>
                   )}
                   {creator.display_name}
-                </a>
+                </Link>
               )}
-              <span>
-                {universe.follower_count}{" "}
-                {universe.follower_count === 1 ? "follower" : "followers"}
-              </span>
             </div>
-            <div className="mt-4 flex gap-3">
+            <div className="mt-4 flex items-center gap-3">
               {user && !isCreator && (
                 <FollowButton
                   universeId={universe.id}
                   initialFollowing={isFollowing}
+                  initialCount={universe.follower_count}
                 />
               )}
+              {!user && (
+                <span className="text-sm text-void-300">
+                  {universe.follower_count}{" "}
+                  {universe.follower_count === 1 ? "follower" : "followers"}
+                </span>
+              )}
               {isCreator && (
-                <a
-                  href={`/create/universe/${universe.slug}/edit`}
-                  className="inline-flex items-center justify-center rounded-md border border-gold px-4 py-2 text-sm font-medium text-gold transition-colors hover:bg-gold/10"
-                >
-                  Edit Universe
-                </a>
+                <>
+                  <Link
+                    href={`/create/universe/${universe.slug}/edit`}
+                    className="inline-flex items-center justify-center rounded-md border border-forge-500 px-4 py-2 text-sm font-medium text-forge-500 transition-colors hover:bg-forge-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500"
+                  >
+                    Edit Universe
+                  </Link>
+                  <span className="text-sm text-void-300">
+                    {universe.follower_count}{" "}
+                    {universe.follower_count === 1 ? "follower" : "followers"}
+                  </span>
+                </>
+              )}
+              {user && !isCreator && (
+                <ReportButton targetType="universe" targetId={universe.id} />
               )}
             </div>
           </div>
@@ -193,28 +211,31 @@ export default async function UniverseDetailPage({
               Comics
             </h2>
             {isCreator && (
-              <a
+              <Link
                 href={`/create/universe/${universe.slug}/edit`}
-                className="text-sm text-gold transition-colors hover:text-gold-light"
+                className="text-sm text-forge-400 transition-colors hover:text-forge-300"
               >
                 Manage Comics
-              </a>
+              </Link>
             )}
           </div>
           {comics && comics.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {comics.map((comic) => (
-                <a
+                <Link
                   key={comic.id}
                   href={`/universe/${slug}/comic/${comic.slug}`}
                 >
                   <Card glow>
                     <div className="aspect-[3/4] overflow-hidden rounded-t-lg bg-void-900">
                       {comic.cover_image_url ? (
-                        <img
+                        <Image
                           src={comic.cover_image_url}
-                          alt={comic.title}
+                          alt={`Cover for ${comic.title}`}
+                          width={300}
+                          height={400}
                           className="h-full w-full object-cover"
+                          loading="lazy"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-void-400">
@@ -224,16 +245,16 @@ export default async function UniverseDetailPage({
                     </div>
                     <div className="p-4">
                       <div className="mb-1 flex items-center gap-2">
-                        <h3 className="font-semibold text-foreground">
+                        <h3 className="font-semibold text-void-50">
                           {comic.title}
                         </h3>
                         <RatingBadge
                           rating={comic.content_rating as ContentRating}
                         />
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-foreground-subtle">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-void-300">
                         {comic.is_origin && (
-                          <span className="rounded bg-gold/20 px-1.5 py-0.5 text-gold">
+                          <span className="rounded bg-forge-500/20 px-1.5 py-0.5 text-forge-400">
                             Origin
                           </span>
                         )}
@@ -247,19 +268,21 @@ export default async function UniverseDetailPage({
                         <span>{comic.page_count} pages</span>
                       </div>
                       {comic.description && (
-                        <p className="mt-2 text-sm text-foreground-muted line-clamp-2">
+                        <p className="mt-2 text-sm text-void-200 line-clamp-2">
                           {comic.description}
                         </p>
                       )}
                     </div>
                   </Card>
-                </a>
+                </Link>
               ))}
             </div>
           ) : (
-            <div className="rounded-lg border border-border bg-surface px-8 py-12 text-center">
-              <p className="text-foreground-muted">
-                No comics published yet.
+            <div className="rounded-lg border border-void-700 bg-void-800 px-8 py-12 text-center">
+              <p className="font-prose text-void-200">
+                {isCreator
+                  ? "Share your first story with the world."
+                  : "No comics published yet. Check back soon."}
               </p>
             </div>
           )}
@@ -272,12 +295,12 @@ export default async function UniverseDetailPage({
               Lore Bible
             </h2>
             {loreEntries && loreEntries.length > 0 && (
-              <a
+              <Link
                 href={`/u/${slug}/lore`}
-                className="text-sm text-gold transition-colors hover:text-gold-light"
+                className="text-sm text-forge-400 transition-colors hover:text-forge-300"
               >
                 Explore All &rarr;
-              </a>
+              </Link>
             )}
           </div>
           {loreEntries && loreEntries.length > 0 ? (
@@ -293,9 +316,11 @@ export default async function UniverseDetailPage({
               ))}
             </div>
           ) : (
-            <div className="rounded-lg border border-border bg-surface px-8 py-12 text-center">
-              <p className="font-prose text-foreground-muted">
-                This universe&rsquo;s lore is still being written.
+            <div className="rounded-lg border border-void-700 bg-void-800 px-8 py-12 text-center">
+              <p className="font-prose text-void-200">
+                {isCreator
+                  ? "Build the lore for readers to discover."
+                  : "This universe's lore is still being written."}
               </p>
             </div>
           )}

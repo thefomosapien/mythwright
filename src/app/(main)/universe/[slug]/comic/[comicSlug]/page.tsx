@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import RatingBadge from "@/components/ui/RatingBadge";
 import Tag from "@/components/ui/Tag";
+import ReportButton from "@/components/ui/ReportButton";
 import ComicPageViewer from "@/components/comic/ComicPageViewer";
 import type { ContentRating } from "@/lib/types/database";
 
@@ -13,7 +15,6 @@ export default async function ComicReaderPage({
   const { slug, comicSlug } = await params;
   const supabase = await createClient();
 
-  // Fetch universe
   const { data: universe } = await supabase
     .from("universes")
     .select("id, slug, title, creator_id, status")
@@ -29,7 +30,6 @@ export default async function ComicReaderPage({
   } = await supabase.auth.getUser();
   const isCreator = user?.id === universe.creator_id;
 
-  // Fetch comic
   const { data: comic } = await supabase
     .from("comics")
     .select("*")
@@ -41,19 +41,16 @@ export default async function ComicReaderPage({
     notFound();
   }
 
-  // Only show draft comics to creator
   if (comic.status !== "published" && !isCreator) {
     notFound();
   }
 
-  // Fetch pages
   const { data: pages } = await supabase
     .from("comic_pages")
     .select("id, page_number, image_url, thumbnail_url, width, height")
     .eq("comic_id", comic.id)
     .order("page_number", { ascending: true });
 
-  // Fetch adjacent comics for navigation
   const { data: allComics } = await supabase
     .from("comics")
     .select("slug, title, sort_order")
@@ -71,15 +68,15 @@ export default async function ComicReaderPage({
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       {/* Breadcrumb */}
-      <nav className="mb-6 text-sm text-foreground-subtle">
-        <a
+      <nav className="mb-6 text-sm text-void-300">
+        <Link
           href={`/universe/${slug}`}
-          className="transition-colors hover:text-gold"
+          className="transition-colors hover:text-forge-400"
         >
           {universe.title}
-        </a>
+        </Link>
         <span className="mx-2">/</span>
-        <span className="text-foreground">{comic.title}</span>
+        <span className="text-void-50">{comic.title}</span>
       </nav>
 
       {/* Comic Header */}
@@ -90,19 +87,22 @@ export default async function ComicReaderPage({
           </h1>
           <RatingBadge rating={comic.content_rating as ContentRating} />
           {comic.is_origin && (
-            <span className="rounded bg-gold/20 px-2 py-0.5 text-xs font-medium text-gold">
+            <span className="rounded bg-forge-500/20 px-2 py-0.5 text-xs font-medium text-forge-400">
               Origin
             </span>
           )}
           <Tag label={comic.canon_status} variant="canon" />
           {isCreator && <Tag label={comic.status} variant="status" />}
+          {user && !isCreator && (
+            <ReportButton targetType="comic" targetId={comic.id} />
+          )}
         </div>
         {comic.description && (
-          <p className="max-w-2xl text-foreground-muted">
+          <p className="max-w-2xl font-prose text-void-200">
             {comic.description}
           </p>
         )}
-        <p className="mt-2 text-sm text-foreground-subtle">
+        <p className="mt-2 text-sm text-void-300">
           {comic.page_count} {comic.page_count === 1 ? "page" : "pages"}
         </p>
       </div>
@@ -120,19 +120,19 @@ export default async function ComicReaderPage({
           }))}
         />
       ) : (
-        <div className="rounded-lg border border-border bg-surface px-8 py-16 text-center">
-          <p className="text-foreground-muted">
+        <div className="rounded-lg border border-void-700 bg-void-800 px-8 py-16 text-center">
+          <p className="font-prose text-void-200">
             No pages uploaded yet.
           </p>
         </div>
       )}
 
       {/* Navigation */}
-      <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
+      <div className="mt-8 flex items-center justify-between border-t border-void-700 pt-6">
         {prevComic ? (
-          <a
+          <Link
             href={`/universe/${slug}/comic/${prevComic.slug}`}
-            className="flex items-center gap-2 text-sm text-foreground-muted transition-colors hover:text-gold"
+            className="flex items-center gap-2 text-sm text-void-200 transition-colors hover:text-forge-400"
           >
             <svg
               className="h-4 w-4"
@@ -148,20 +148,20 @@ export default async function ComicReaderPage({
               />
             </svg>
             {prevComic.title}
-          </a>
+          </Link>
         ) : (
           <div />
         )}
-        <a
+        <Link
           href={`/universe/${slug}`}
-          className="text-sm text-foreground-subtle transition-colors hover:text-gold"
+          className="text-sm text-void-300 transition-colors hover:text-forge-400"
         >
           Back to Universe
-        </a>
+        </Link>
         {nextComic ? (
-          <a
+          <Link
             href={`/universe/${slug}/comic/${nextComic.slug}`}
-            className="flex items-center gap-2 text-sm text-foreground-muted transition-colors hover:text-gold"
+            className="flex items-center gap-2 text-sm text-void-200 transition-colors hover:text-forge-400"
           >
             {nextComic.title}
             <svg
@@ -177,7 +177,7 @@ export default async function ComicReaderPage({
                 d="M9 5l7 7-7 7"
               />
             </svg>
-          </a>
+          </Link>
         ) : (
           <div />
         )}
