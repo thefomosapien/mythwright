@@ -42,7 +42,7 @@ export default function ComicPageViewer({ pages }: ComicPageViewerProps) {
 
   useEffect(() => {
     if (viewMode !== "single") return;
-    resetHideTimer();
+    resetHideTimer(); // eslint-disable-line react-hooks/set-state-in-effect -- timer reset on mode change
     return () => {
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     };

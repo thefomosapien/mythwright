@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import type { Profile } from "@/lib/types/database";
 import Button from "@/components/ui/Button";
@@ -38,9 +39,11 @@ export default function NavBar({ user, profile }: NavBarProps) {
                 className="flex items-center gap-2 rounded-full p-1 hover:bg-surface-hover transition-colors"
               >
                 {profile.avatar_url ? (
-                  <img
+                  <Image
                     src={profile.avatar_url}
                     alt={profile.display_name}
+                    width={32}
+                    height={32}
                     className="h-8 w-8 rounded-full object-cover"
                   />
                 ) : (
@@ -52,10 +55,10 @@ export default function NavBar({ user, profile }: NavBarProps) {
             </>
           ) : (
             <>
-              <Link href="/login">
+              <Link href="/login" className="inline-flex">
                 <Button variant="ghost" size="sm">Log In</Button>
               </Link>
-              <Link href="/signup">
+              <Link href="/signup" className="inline-flex">
                 <Button variant="primary" size="sm">Sign Up</Button>
               </Link>
             </>
@@ -98,9 +101,11 @@ export default function NavBar({ user, profile }: NavBarProps) {
                 className="flex items-center gap-2 rounded px-3 py-2 text-sm text-foreground-muted hover:bg-surface-hover"
               >
                 {profile.avatar_url ? (
-                  <img
+                  <Image
                     src={profile.avatar_url}
                     alt={profile.display_name}
+                    width={24}
+                    height={24}
                     className="h-6 w-6 rounded-full object-cover"
                   />
                 ) : (

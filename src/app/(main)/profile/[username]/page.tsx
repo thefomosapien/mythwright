@@ -52,8 +52,8 @@ export default async function ProfilePage({
     .eq("user_id", profile.id);
 
   const followedUniverses = (follows
-    ?.map((f) => f.universes)
-    .filter(Boolean) || []) as UniverseCardData[];
+    ?.map((f) => f.universes as unknown as UniverseCardData)
+    .filter(Boolean) || []);
 
   const joinDate = new Date(profile.created_at).toLocaleDateString("en-US", {
     month: "long",
@@ -102,7 +102,7 @@ export default async function ProfilePage({
           {isOwner && (
             <Link
               href={`/profile/${profile.username}/edit`}
-              className="mt-3 inline-flex items-center justify-center rounded-md border border-forge-500 px-4 py-2 text-sm font-medium text-forge-500 transition-colors hover:bg-forge-500/10"
+              className="mt-3 inline-flex items-center justify-center rounded-md border border-forge-500 px-4 py-2 text-sm font-medium text-forge-500 transition-colors hover:bg-forge-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500"
             >
               Edit Profile
             </Link>

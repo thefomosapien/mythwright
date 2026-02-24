@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import UniverseCard from "./UniverseCard";
 import type { UniverseCardData } from "./UniverseCard";
@@ -180,7 +181,7 @@ export default function UniverseDiscovery({
       >
         <button
           onClick={() => setSelectedGenre(null)}
-          className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+          className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500 ${
             selectedGenre === null
               ? "bg-forge-500 text-void-950"
               : "border border-void-600 text-void-200 hover:border-void-500 hover:text-void-100"
@@ -192,7 +193,7 @@ export default function UniverseDiscovery({
           <button
             key={genre}
             onClick={() => setSelectedGenre(selectedGenre === genre ? null : genre)}
-            className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+            className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500 ${
               selectedGenre === genre
                 ? "bg-forge-500 text-void-950"
                 : "border border-void-600 text-void-200 hover:border-void-500 hover:text-void-100"
@@ -268,12 +269,12 @@ export default function UniverseDiscovery({
               <p className="mb-4 font-prose text-lg text-void-200">
                 No worlds have been forged yet. Be the first.
               </p>
-              <a
+              <Link
                 href="/signup"
-                className="inline-flex items-center justify-center rounded-md bg-forge-500 px-6 py-3 text-base font-medium text-void-950 transition-colors hover:bg-forge-300"
+                className="inline-flex items-center justify-center rounded-md bg-forge-500 px-6 py-3 text-base font-medium text-void-950 transition-colors hover:bg-forge-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500"
               >
                 Start Creating
-              </a>
+              </Link>
             </div>
           )}
         </div>
@@ -285,7 +286,7 @@ export default function UniverseDiscovery({
           <button
             onClick={() => setPage(Math.max(0, page - 1))}
             disabled={page === 0}
-            className="rounded-md border border-void-700 px-3 py-2 text-sm text-void-200 transition-colors hover:border-void-500 hover:text-void-100 disabled:cursor-not-allowed disabled:opacity-30"
+            className="rounded-md border border-void-700 px-3 py-2 text-sm text-void-200 transition-colors hover:border-void-500 hover:text-void-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500 disabled:cursor-not-allowed disabled:opacity-30"
           >
             Previous
           </button>
@@ -295,7 +296,7 @@ export default function UniverseDiscovery({
           <button
             onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
             disabled={page >= totalPages - 1}
-            className="rounded-md border border-void-700 px-3 py-2 text-sm text-void-200 transition-colors hover:border-void-500 hover:text-void-100 disabled:cursor-not-allowed disabled:opacity-30"
+            className="rounded-md border border-void-700 px-3 py-2 text-sm text-void-200 transition-colors hover:border-void-500 hover:text-void-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500 disabled:cursor-not-allowed disabled:opacity-30"
           >
             Next
           </button>

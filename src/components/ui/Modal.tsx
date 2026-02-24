@@ -35,14 +35,16 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
       className="fixed inset-0 z-50 flex items-center justify-center"
       role="dialog"
       aria-modal="true"
+      aria-labelledby="modal-title"
     >
       <div
         className="absolute inset-0 bg-black/60"
         onClick={onClose}
+        aria-hidden="true"
       />
       <div className="relative z-10 mx-4 w-full max-w-lg rounded-lg border border-border bg-surface p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+          <h2 id="modal-title" className="text-lg font-semibold text-foreground">{title}</h2>
           <button
             onClick={onClose}
             className="rounded p-1 text-foreground-subtle hover:text-foreground hover:bg-surface-hover transition-colors"

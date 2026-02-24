@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import Card from "@/components/ui/Card";
 import RatingBadge from "@/components/ui/RatingBadge";
@@ -87,18 +89,18 @@ export default async function CreatorDashboard() {
       <div className="mb-10 flex items-center justify-between">
         <h1 className="font-display text-3xl font-bold text-void-50">Your Worlds</h1>
         <div className="flex items-center gap-3">
-          <a
+          <Link
             href="/create/universe/new"
-            className="inline-flex items-center justify-center rounded-md border border-forge-500 px-4 py-2 text-sm font-medium text-forge-500 transition-colors hover:bg-forge-500/10"
+            className="inline-flex items-center justify-center rounded-md border border-forge-500 px-4 py-2 text-sm font-medium text-forge-500 transition-colors hover:bg-forge-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500"
           >
             New Universe
-          </a>
-          <a
+          </Link>
+          <Link
             href="/create/comic/new"
-            className="inline-flex items-center justify-center rounded-md bg-forge-500 px-6 py-3 text-base font-medium text-void-950 transition-colors hover:bg-forge-300"
+            className="inline-flex items-center justify-center rounded-md bg-forge-500 px-6 py-3 text-base font-medium text-void-950 transition-colors hover:bg-forge-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500"
           >
             New Comic
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -106,13 +108,15 @@ export default async function CreatorDashboard() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {universes.map((universe) => (
             <div key={universe.id}>
-              <a href={`/create/universe/${universe.slug}/edit`}>
+              <Link href={`/create/universe/${universe.slug}/edit`}>
                 <Card glow>
                   {universe.cover_image_url && (
                     <div className="aspect-[16/9] overflow-hidden rounded-t-lg">
-                      <img
+                      <Image
                         src={universe.cover_image_url}
                         alt={universe.title}
+                        width={400}
+                        height={225}
                         className="h-full w-full object-cover"
                       />
                     </div>
@@ -141,16 +145,16 @@ export default async function CreatorDashboard() {
                     </div>
                   </div>
                 </Card>
-              </a>
+              </Link>
 
               {/* Comics under this universe */}
               {comicsByUniverse[universe.id]?.length > 0 && (
                 <div className="mt-2 space-y-1 pl-2">
                   {comicsByUniverse[universe.id].map((comic) => (
-                    <a
+                    <Link
                       key={comic.id}
                       href={`/create/comic/${comic.id}/pages`}
-                      className="flex items-center justify-between rounded-md px-3 py-1.5 text-sm transition-colors hover:bg-surface-hover"
+                      className="flex items-center justify-between rounded-md px-3 py-1.5 text-sm transition-colors hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500"
                     >
                       <span className="truncate text-foreground-muted">
                         {comic.title}
@@ -167,7 +171,7 @@ export default async function CreatorDashboard() {
                           {comic.status}
                         </span>
                       </span>
-                    </a>
+                    </Link>
                   ))}
                 </div>
               )}
@@ -180,12 +184,12 @@ export default async function CreatorDashboard() {
             You haven&apos;t created anything yet. Start by uploading your
             first comic!
           </p>
-          <a
+          <Link
             href="/create/comic/new"
-            className="inline-flex items-center justify-center rounded-md bg-forge-500 px-6 py-3 text-base font-medium text-void-950 transition-colors hover:bg-forge-300"
+            className="inline-flex items-center justify-center rounded-md bg-forge-500 px-6 py-3 text-base font-medium text-void-950 transition-colors hover:bg-forge-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500"
           >
             Create Your First Comic
-          </a>
+          </Link>
         </div>
       )}
     </div>

@@ -187,7 +187,7 @@ export default async function UniverseDetailPage({
                 <>
                   <Link
                     href={`/create/universe/${universe.slug}/edit`}
-                    className="inline-flex items-center justify-center rounded-md border border-forge-500 px-4 py-2 text-sm font-medium text-forge-500 transition-colors hover:bg-forge-500/10"
+                    className="inline-flex items-center justify-center rounded-md border border-forge-500 px-4 py-2 text-sm font-medium text-forge-500 transition-colors hover:bg-forge-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forge-500"
                   >
                     Edit Universe
                   </Link>
