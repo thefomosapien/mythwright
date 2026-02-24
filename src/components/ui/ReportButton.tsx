@@ -112,7 +112,9 @@ export default function ReportButton({
       >
         {submitted ? (
           <div className="py-4 text-center">
-            <p className="text-success font-medium">Report submitted. Thank you.</p>
+            <p className="text-success font-medium">
+              Thank you for helping keep Mythwright safe. We&apos;ll review your report.
+            </p>
           </div>
         ) : (
           <div className="space-y-4">

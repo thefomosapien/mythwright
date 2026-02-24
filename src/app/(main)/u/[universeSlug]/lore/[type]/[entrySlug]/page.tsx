@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import LoreEntryPageComponent from "@/components/lore/LoreEntryPage";
+import ReportButton from "@/components/ui/ReportButton";
 import { getAllCrossReferences } from "@/lib/utils/cross-references";
 import type { LoreEntry, LoreEntryType } from "@/lib/types/database";
 
@@ -22,12 +23,10 @@ export default async function LoreEntryDetailPage({
   const { universeSlug, type, entrySlug } = await params;
   const supabase = await createClient();
 
-  // Validate type
   if (!VALID_TYPES.includes(type as LoreEntryType)) {
     notFound();
   }
 
-  // Fetch universe
   const { data: universe } = await supabase
     .from("universes")
     .select("id, slug, title, status, creator_id")
@@ -43,12 +42,10 @@ export default async function LoreEntryDetailPage({
   } = await supabase.auth.getUser();
   const isCreator = user?.id === universe.creator_id;
 
-  // Only published universes are public (unless creator)
   if (universe.status !== "published" && !isCreator) {
     notFound();
   }
 
-  // Fetch the lore entry
   const { data: entry } = await supabase
     .from("lore_entries")
     .select("*")
@@ -61,12 +58,10 @@ export default async function LoreEntryDetailPage({
     notFound();
   }
 
-  // Draft entries only visible to creator
   if (entry.status !== "published" && !isCreator) {
     notFound();
   }
 
-  // Resolve cross-references
   const crossReferences = await getAllCrossReferences(supabase, {
     id: entry.id,
     entry_type: entry.entry_type,
@@ -75,10 +70,20 @@ export default async function LoreEntryDetailPage({
   });
 
   return (
-    <LoreEntryPageComponent
-      entry={entry as LoreEntry}
-      universe={{ slug: universe.slug, title: universe.title }}
-      crossReferences={crossReferences}
-    />
+    <div>
+      <LoreEntryPageComponent
+        entry={entry as LoreEntry}
+        universe={{ slug: universe.slug, title: universe.title }}
+        crossReferences={crossReferences}
+      />
+      {user && !isCreator && (
+        <div className="mx-auto max-w-4xl px-4 pb-8">
+          <div className="flex items-center gap-2 text-sm text-void-400">
+            <ReportButton targetType="lore_entry" targetId={entry.id} />
+            <span>Report this entry</span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
