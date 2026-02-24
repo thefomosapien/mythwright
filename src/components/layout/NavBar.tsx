@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types/database";
 import Button from "@/components/ui/Button";
 
@@ -13,6 +15,14 @@ export interface NavBarProps {
 
 export default function NavBar({ user, profile }: NavBarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
@@ -52,6 +62,12 @@ export default function NavBar({ user, profile }: NavBarProps) {
                   </div>
                 )}
               </Link>
+              <button
+                onClick={handleLogout}
+                className="text-sm text-foreground-muted hover:text-foreground transition-colors"
+              >
+                Log Out
+              </button>
             </>
           ) : (
             <>
@@ -115,6 +131,15 @@ export default function NavBar({ user, profile }: NavBarProps) {
                 )}
                 <span>{profile.display_name}</span>
               </Link>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  handleLogout();
+                }}
+                className="block w-full rounded px-3 py-2 text-left text-sm text-foreground-muted hover:bg-surface-hover"
+              >
+                Log Out
+              </button>
             </div>
           ) : (
             <div className="space-y-2">
