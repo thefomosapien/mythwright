@@ -17,7 +17,7 @@ export default function NavBar({ user, profile }: NavBarProps) {
     <nav className="fixed top-0 left-0 right-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
         {/* Logo */}
-        <Link href="/" className="text-lg font-bold tracking-[0.2em] text-gold uppercase">
+        <Link href="/" className="font-display text-lg font-bold tracking-[0.2em] text-forge-500 uppercase">
           Mythwright
         </Link>
 

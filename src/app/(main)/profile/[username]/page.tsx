@@ -78,7 +78,7 @@ export default async function ProfilePage({
           </div>
         )}
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground">
+          <h1 className="font-display text-2xl font-bold text-void-50">
             {profile.display_name}
           </h1>
           <p className="text-sm text-foreground-subtle">@{profile.username}</p>
@@ -98,7 +98,7 @@ export default async function ProfilePage({
 
       {/* Created Universes */}
       <section className="mb-12">
-        <h2 className="mb-6 text-xl font-semibold text-foreground">
+        <h2 className="mb-6 font-display text-xl font-semibold text-void-50">
           Created Universes
         </h2>
         {universes && universes.length > 0 ? (
@@ -147,7 +147,7 @@ export default async function ProfilePage({
 
       {/* Following */}
       <section>
-        <h2 className="mb-6 text-xl font-semibold text-foreground">
+        <h2 className="mb-6 font-display text-xl font-semibold text-void-50">
           Following
         </h2>
         {followedUniverses && followedUniverses.length > 0 ? (

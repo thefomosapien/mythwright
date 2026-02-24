@@ -131,7 +131,7 @@ export default async function UniverseDetailPage({
           )}
           <div className="flex-1">
             <div className="mb-2 flex flex-wrap items-center gap-3">
-              <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+              <h1 className="font-display text-3xl font-bold text-void-50 sm:text-4xl">
                 {universe.title}
               </h1>
               <RatingBadge
@@ -142,12 +142,12 @@ export default async function UniverseDetailPage({
               )}
             </div>
             {universe.tagline && (
-              <p className="mb-3 text-lg text-foreground-muted">
+              <p className="mb-3 font-prose text-lg text-void-200">
                 {universe.tagline}
               </p>
             )}
             {universe.description && (
-              <p className="mb-4 max-w-2xl text-foreground-muted">
+              <p className="mb-4 max-w-2xl font-prose text-void-200">
                 {universe.description}
               </p>
             )}
@@ -207,7 +207,7 @@ export default async function UniverseDetailPage({
         {/* Comics Section */}
         <section className="mb-12">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-foreground">Comics</h2>
+            <h2 className="font-display text-xl font-semibold text-void-50">Comics</h2>
             {isCreator && (
               <a
                 href={`/create/universe/${universe.slug}/edit`}
@@ -280,7 +280,7 @@ export default async function UniverseDetailPage({
         {/* Lore Section */}
         {loreEntries && loreEntries.length > 0 && (
           <section>
-            <h2 className="mb-6 text-xl font-semibold text-foreground">
+            <h2 className="mb-6 font-display text-xl font-semibold text-void-50">
               Lorebook
             </h2>
             <div className="space-y-8">

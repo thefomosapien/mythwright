@@ -16,10 +16,10 @@ export default async function HomePage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
       <div className="mb-10">
-        <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+        <h1 className="font-display text-3xl font-bold text-void-50 sm:text-4xl">
           Discover Worlds
         </h1>
-        <p className="mt-2 text-foreground-muted">
+        <p className="mt-2 font-prose text-lg text-void-200">
           Explore comic universes built by creators and expanded by communities.
         </p>
       </div>

@@ -85,7 +85,7 @@ export default async function ComicReaderPage({
       {/* Comic Header */}
       <div className="mb-8">
         <div className="mb-2 flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+          <h1 className="font-display text-2xl font-bold text-void-50 sm:text-3xl">
             {comic.title}
           </h1>
           <RatingBadge rating={comic.content_rating as ContentRating} />
@@ -114,6 +114,7 @@ export default async function ComicReaderPage({
             id: p.id,
             pageNumber: p.page_number,
             imageUrl: p.image_url,
+            thumbnailUrl: p.thumbnail_url || undefined,
             width: p.width,
             height: p.height,
           }))}

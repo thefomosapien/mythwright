@@ -19,9 +19,9 @@ const sizeClasses = {
 
 const variantClasses = {
   primary:
-    "bg-gold text-background font-medium hover:bg-gold-light active:bg-gold-dark",
+    "bg-forge-500 text-void-950 font-medium hover:bg-forge-300 active:bg-forge-600",
   secondary:
-    "border border-gold text-gold font-medium hover:bg-gold/10 active:bg-gold/20",
+    "border border-forge-500 text-forge-500 font-medium hover:bg-forge-500/10 active:bg-forge-500/20",
   ghost:
     "text-foreground-muted hover:text-foreground hover:bg-surface-hover",
 };
